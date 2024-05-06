@@ -34,4 +34,6 @@ build/
 
 # Ignore application.properties file
 src/main/resources/application.properties
+src/main/resources/aws-s3-key/sebastian-anandas_accessKeys.csv
+
 
