@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/S3")
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:3000")
 public class S3ImageUploaderController {
 
     private S3ImageUploader s3ImageUploader;

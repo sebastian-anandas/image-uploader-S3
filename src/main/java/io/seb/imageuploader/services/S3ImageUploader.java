@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 public class S3ImageUploader implements ImageUploader {
 
     @Autowired
-    private AmazonS3 amazonS3;
+    private AmazonS3 S3Client;
 
-    public S3ImageUploader(AmazonS3 amazonS3) {
-        this.amazonS3 = amazonS3;
+    public S3ImageUploader(AmazonS3 S3Client) {
+        this.S3Client = S3Client;
     }
 
 
@@ -47,7 +47,7 @@ public class S3ImageUploader implements ImageUploader {
         metaData.setContentLength(image.getSize());
 
         try {
-            PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(bucket, fileName, image.getInputStream(), metaData));
+            PutObjectResult putObjectResult = S3Client.putObject(new PutObjectRequest(bucket, fileName, image.getInputStream(), metaData));
             return this.preSignedUrl(fileName);
         } catch (IOException e) {
             throw new ImageUploadException("Error in umploading image " + e.getMessage());
@@ -60,7 +60,7 @@ public class S3ImageUploader implements ImageUploader {
 
         ListObjectsV2Request listObjectsV2Request = new ListObjectsV2Request()
                 .withBucketName(bucket);
-        ListObjectsV2Result listObjectsV2Result = amazonS3.listObjectsV2(listObjectsV2Request);
+        ListObjectsV2Result listObjectsV2Result = S3Client.listObjectsV2(listObjectsV2Request);
         List<S3ObjectSummary> objectSummaries = listObjectsV2Result.getObjectSummaries();
 
         List<String> listFileUrls = objectSummaries.stream().map(item -> this.preSignedUrl(item.getKey())).collect(Collectors.toList());
@@ -83,7 +83,7 @@ public class S3ImageUploader implements ImageUploader {
                         .withMethod(HttpMethod.GET)
                         .withExpiration(expirationDate);
 
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+        URL url = S3Client.generatePresignedUrl(generatePresignedUrlRequest);
 
         return url.toString();
     }
@@ -91,7 +91,7 @@ public class S3ImageUploader implements ImageUploader {
     @Override
     public String getImageUrlByName(String filename) {
 
-        S3Object s3Object = amazonS3.getObject(bucket, filename);
+        S3Object s3Object = S3Client.getObject(bucket, filename);
         String url = preSignedUrl(s3Object.getKey());
 
         return url;
